@@ -4,8 +4,11 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import fileUpload from "express-fileupload";
 import { connection } from "./database/connection.js";
+import { errorMiddleware } from "./middlewares/error.js";
+import userRouter from "./router/userRoutes.js";
 
 const app = express();
+
 
 config({
     path: "./config/config.env",
@@ -13,7 +16,7 @@ config({
 
 app.use(
     cors({
-        origin: [process.env.FRONTEND_URL],
+        origin: "*",
         methods: ["GET", "POST", "PUT", "DELETE"],
         credentials: true,
     })
@@ -26,11 +29,14 @@ app.use(express.urlencoded({ extended: true }));
 app.use(
     fileUpload({
         useTempFiles: true,
-        tempFileDir: "/temp/",
+        tempFileDir: "./temp/",
     })
 );
 
+app.use("/api/v1/user", userRouter);
+
 connection();
 
+app.use(errorMiddleware);
 
 export default app;
