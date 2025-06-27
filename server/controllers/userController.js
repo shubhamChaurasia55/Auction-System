@@ -2,6 +2,7 @@ import { catchAsyncErrors } from "../middlewares/catchAsyncErrors.js";
 import ErrorHandler from "../middlewares/error.js";
 import { User } from "../models/userSchema.js";
 import { v2 as cloudinary } from "cloudinary";
+import { generateToken } from "../utils/jwtToken.js";
 
 export const register = catchAsyncErrors(async (req, res, next) => {
     if(!req.files || Object.keys(req.files).length === 0) {
@@ -32,7 +33,7 @@ export const register = catchAsyncErrors(async (req, res, next) => {
     if(!userName || !email || !password || !phone || !address || !role) {
         return next(new ErrorHandler("Please fill all the required fields.", 400));
     }
-    if(role !== "Auctioneer") {
+    if(role == "Auctioneer") {
         if(!bankAccountNumber || !bankAccountName || !bankName) {
             return next(new ErrorHandler("Please fill all the payment method fields.", 400));
         }
@@ -83,11 +84,38 @@ export const register = catchAsyncErrors(async (req, res, next) => {
             }
         }
     });
-
-    res.status(201).json({
-        success: true,
-        message: "User registered successfully.",
-    });
-
+    generateToken(user, "User registered successfully.", 201, res);
+    
 });
 
+export const login = catchAsyncErrors(async (req, res, next) => {
+
+    const { email, password } = req.body;
+
+    if(!email || !password) {
+        return next(new ErrorHandler("Please fill all the required fields.", 400));
+    }
+
+    const user = await User.findOne({email}).select("+password");
+    if(!user){
+        return next(new ErrorHandler("User not found with this email.", 404));
+    }
+    const isPasswordMatch = await user.comparePassword(password);
+    if(!isPasswordMatch) {
+        return next(new ErrorHandler("Invalid email or password.", 401));
+    }
+
+    generateToken(user, "User logged in successfully.", 200, res);
+});
+
+export const getProfile = catchAsyncErrors(async (req, res, next) => {
+    const user = req.user;
+    res.status(200).json({
+        success: true,
+        user
+    });
+});
+
+export const logout = catchAsyncErrors(async (req, res, next) => {});
+
+export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {});
