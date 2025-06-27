@@ -116,6 +116,21 @@ export const getProfile = catchAsyncErrors(async (req, res, next) => {
     });
 });
 
-export const logout = catchAsyncErrors(async (req, res, next) => {});
+export const logout = catchAsyncErrors(async (req, res, next) => {
+    res.status(200).cookie("token", "", {
+        expires: new Date(Date.now()),
+        httpOnly: true
+    }).json({
+        success: true,
+        message: "Logged out successfully."
+    });
+});
 
-export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {});
+export const fetchLeaderboard = catchAsyncErrors(async (req, res, next) => {
+    const users = await User.find({ moneySpent: { $gt: 0 } });
+    const leaderboard = users.sort((a, b) => b.moneySpent - a.moneySpent);
+    res.status(200).json({
+        success: true,
+        leaderboard,
+    });
+});
