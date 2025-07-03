@@ -5,7 +5,8 @@ import {
     getAllPaymentProofs,
     getPaymentProofDetail,
     updateProofStatus,
-    fetchAllUsers
+    fetchAllUsers,
+    monthelyRevenue
     
 } from "../controllers/superAdminController.js";
 import { isAuthenticated, isAuthorized } from "../middlewares/auth.js";
@@ -23,5 +24,7 @@ router.put("/paymentproof/status/update/:id", isAuthenticated, isAuthorized("Sup
 router.delete("/paymentproof/delete/:id", isAuthenticated, isAuthorized("Super Admin"), deletePaymentProof);
 
 router.get("/users/getall", isAuthenticated, isAuthorized("Super Admin"), fetchAllUsers);
+
+router.get("/monthelyincome", isAuthenticated, isAuthorized("Super Admin"), monthelyRevenue);
 
 export default router;
